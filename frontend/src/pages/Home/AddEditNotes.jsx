@@ -5,18 +5,16 @@ import axiosInstance from '../../utils/axiosInstance';
 
 const AddEditNotes = ({noteData, type, getAllNotes, onClose, showToastMessage}) => {
 
-    const [title, setTitle] = useState(noteData?.title || "");
-    const [content, setContent] = useState(noteData?.content || "");
-    const [tags, setTags] = useState(noteData?.tags || []);
+    const [empName, setEmpName] = useState(noteData?.empName || "");
+    const [designation, setDesignation] = useState(noteData?.designation || "");
 
     const [error,setError] = useState(null);
 
     const addNewNote = async () => {
         try {
             const response = await axiosInstance.post("/add-note",{
-                title,
-                content,
-                tags,
+                empName,
+                designation,
             });
 
             if(response.data && response.data.note) {
@@ -40,13 +38,12 @@ const AddEditNotes = ({noteData, type, getAllNotes, onClose, showToastMessage}) 
 
         try {
             const response = await axiosInstance.put("/edit-note/" + noteId,{
-                title,
-                content,
-                tags,
+                empName,
+                designation,
             });
 
             if(response.data && response.data.note) {
-                showToastMessage("Note Updated Successfully")
+                showToastMessage("Employee Data Updated Successfully")
                 getAllNotes()
                 onClose()
             }
@@ -62,13 +59,13 @@ const AddEditNotes = ({noteData, type, getAllNotes, onClose, showToastMessage}) 
     }
 
     const handleAddNote = () => {
-        if(!title) {
-            setError('please enter the title');
+        if(!empName) {
+            setError('please enter the empName');
             return;
         }
 
-        if(!content) {
-            setError('Please enter the content');
+        if(!designation) {
+            setError('Please enter the designation');
             return;
         }
 
@@ -89,31 +86,26 @@ const AddEditNotes = ({noteData, type, getAllNotes, onClose, showToastMessage}) 
                 <MdClose className='text-xl text-slate-400' />
             </button>
             <div className='flex flex-col gap-2'>
-                <label className='input-label'>TITLE </label>
+                <label className='input-label'>Employee Name </label>
                 <input
                     type="text"
                     className='text-2xl text-slate-950 outline-none'
-                    placeholder='Go To gym At 5'
-                    value={title}
-                    onChange={({target}) => setTitle(target.value)}
+                    placeholder='John Smith'
+                    value={empName}
+                    onChange={({target}) => setEmpName(target.value)}
                 />
             </div>
 
             <div className='flex flex-col gap-2 mt-4'>
-                <label className='input-label'>CONTENT</label>
+                <label className='input-label'>Designation</label>
                 <textarea
                     type="text"
                     className='text-sm text-slate-950 outline-none bg-slate-50 p-2 rounded'
-                    placeholder='Content'
+                    placeholder='designation'
                     rows={10}
-                    value={content}
-                    onChange={({target}) => setContent(target.value)}
+                    value={designation}
+                    onChange={({target}) => setDesignation(target.value)}
                 />
-            </div>
-
-            <div className='mt-3'>
-                <label className='input-label'>TAGS</label>
-                <TagInput tags={tags} setTags={setTags} />
             </div>
 
             {error && <p className='text-red-500 text-xs pt-4'>{error}</p>}
@@ -128,4 +120,4 @@ const AddEditNotes = ({noteData, type, getAllNotes, onClose, showToastMessage}) 
     )
 }
 
-export default AddEditNotes
+export default AddEditNotes;

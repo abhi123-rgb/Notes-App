@@ -23,9 +23,7 @@ app.use(
   })
 );
 
-app.get("/", (req, res) => {
-  res.json({ data: "hello" });
-});
+
 
 app.post("/create-account", async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -152,7 +150,7 @@ app.post("/manager-login", async (req, res) => {
   }
 });
 
-app.get("/get-user",authenticateToken,  async (req, res) => {
+app.get("/get-user",authenticateToken, async (req, res) => {
     const { user } = req.user;
 
     const isUser = await User.findOne({_id: user._id});
@@ -173,25 +171,25 @@ app.get("/get-user",authenticateToken,  async (req, res) => {
     });
 });
 
+
 app.post("/add-note", authenticateToken, async (req, res) => {
-  const { title, content, tags } = req.body;
+  const { empName, designation } = req.body;
   const { user } = req.user;
 
-  if (!title) {
-    return res.status(400).json({ error: true, message: "Title is required" });
+  if (!empName) {
+    return res.status(400).json({ error: true, message: "empName is required" });
   }
 
-  if (!content) {
+  if (!designation) {
     return res
       .status(400)
-      .json({ error: true, message: "Content is required" });
+      .json({ error: true, message: "designation is required" });
   }
 
   try {
     const note = new Note({
-      title,
-      content,
-      tags: tags || [],
+      empName,
+      designation,
       userId: user._id,
     });
 
@@ -212,10 +210,10 @@ app.post("/add-note", authenticateToken, async (req, res) => {
 
 app.put("/edit-note/:noteId", authenticateToken, async (req, res) => {
   const noteId = req.params.noteId;
-  const { title, content, tags, isPinned } = req.body;
+  const { empName, designation} = req.body;
   const { user } = req.user;
 
-  if (!title && !content && !tags) {
+  if (!empName && !designation) {
     return res.status(400).json({
       error: true,
       message: "No changes provided",
@@ -232,10 +230,9 @@ app.put("/edit-note/:noteId", authenticateToken, async (req, res) => {
       });
     }
 
-    if (title) note.title = title;
-    if (content) note.content = content;
-    if (tags) note.tags = tags;
-    if (isPinned) note.isPinned = isPinned;
+    if (empName) note.empName = empName;
+    if (designation) note.designation = designation;
+
 
     await note.save();
 
@@ -252,7 +249,7 @@ app.put("/edit-note/:noteId", authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/get-all-notes", authenticateToken, async (req, res) => {
+app.get("/get-all-employee", authenticateToken, async (req, res) => {
   const { user } = req.user;
 
   try {
@@ -261,7 +258,7 @@ app.get("/get-all-notes", authenticateToken, async (req, res) => {
     return res.json({
       error: false,
       notes,
-      message: "All notes retrived successfully",
+      message: "All employee retrived successfully",
     });
   } catch (error) {
     return res.status(500).json({

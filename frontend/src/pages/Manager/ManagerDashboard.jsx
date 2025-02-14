@@ -13,49 +13,49 @@ import NoDataFound from '../../assets/search-no-result.jpg'
 
 const ManagerDashboard = () => {
 
-    const [openAddEditModal, setOpenAddEditModal] = useState({
-      isShown: false,
-      type: "add",
-      data: null,
+  const [openAddEditModal, setOpenAddEditModal] = useState({
+    isShown: false,
+    type: "add",
+    data: null,
+  });
+
+  const [showToastMsg, setShowToastMsg] = useState({
+    isShown: false,
+    message: "",
+    type: "add",
+  });
+
+  const showToastMessage = (message, type) => {
+    setShowToastMsg({
+      isShown: true,
+      message,
+      type,
     });
-  
-    const [showToastMsg, setShowToastMsg] = useState({
+  };
+
+  const handleCloseToast = () => {
+    setShowToastMsg({
       isShown: false,
       message: "",
-      type: "add",
     });
-  
-    const showToastMessage = (message, type) => {
-      setShowToastMsg({
-        isShown: true,
-        message,
-        type,
-      });
-    };
-  
-    const handleCloseToast = () => {
-      setShowToastMsg({
-        isShown: false,
-        message: "",
-      });
-    };
+  };
 
   const [userInfo, setUserInfo] = useState(null);
-   const [isSearch, setIsSearch] = useState(false);
-    const [allNotes, setAllNotes] = useState([]);
+  const [isSearch, setIsSearch] = useState(false);
+  const [allNotes, setAllNotes] = useState([]);
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const getUserInfo = async () => {
     try {
       const response = await axiosInstance.get("/get-user");
       console.log(response.data.user.role);
       if (response.data.user.role !== "Manager") {
-       
+
         navigate("/unauthorized");
         return;
       }
-    
+
       if (response.data && response.data.user) {
         setUserInfo(response.data.user);
       }
@@ -69,7 +69,7 @@ const ManagerDashboard = () => {
 
   const getAllNotes = async () => {
     try {
-      const response = await axiosInstance.get("/get-all-notes");
+      const response = await axiosInstance.get("/get-all-employee");
 
       if (response.data && response.data.notes) {
         setAllNotes(response.data.notes);
@@ -153,23 +153,22 @@ const ManagerDashboard = () => {
 
   return (
     <>
-    <Navbar
+      <Navbar
         userInfo={userInfo}
         onSearchNote={onSearchNote}
         handleClearSearch={handleClearSearch}
       />
 
-   
+
       <div className='container mx-auto'>
         {allNotes.length > 0 ? (
           <div className='grid grid-cols-3 gap-4 mt-8'>
             {allNotes.map((item, index) => (
               <NoteCard
                 key={item._id}
-                title={item.title}
+                empName={item.empName}
                 date={item.createdOn}
-                content={item.content}
-                tags={item.tags}
+                designation={item.designation}
                 isPinned={item.isPinned}
                 onEdit={() => handleEdit(item)}
                 onDelete={() => deleteNote(item)}

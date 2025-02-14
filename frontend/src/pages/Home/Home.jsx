@@ -47,6 +47,7 @@ const Home = () => {
   const [isSearch, setIsSearch] = useState(false);
 
   const navigate = useNavigate();
+  console.log(allNotes)
 
   const handleEdit = (noteDetails) => {
     setOpenAddEditModal({ isShown: true, data: noteDetails, type: "edit" });
@@ -75,7 +76,7 @@ const Home = () => {
 
   const getAllNotes = async () => {
     try {
-      const response = await axiosInstance.get("/get-all-notes");
+      const response = await axiosInstance.get("/get-all-employee");
 
       if (response.data && response.data.notes) {
         setAllNotes(response.data.notes);
@@ -153,6 +154,7 @@ const Home = () => {
     return () => { };
   }, []);
 
+  console.log(openAddEditModal.data)
 
   return (
     <>
@@ -168,10 +170,9 @@ const Home = () => {
             {allNotes.map((item, index) => (
               <NoteCard
                 key={item._id}
-                title={item.title}
+                empName={item.empName}
                 date={item.createdOn}
-                content={item.content}
-                tags={item.tags}
+                designation={item.designation}
                 isPinned={item.isPinned}
                 onEdit={() => handleEdit(item)}
                 onDelete={() => deleteNote(item)}
