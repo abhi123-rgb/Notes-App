@@ -1,6 +1,7 @@
 require("dotenv").config();
 const config = require("./config.json");
 const mongoose = require("mongoose");
+const authRoles = require("./roleAuth");
 
 mongoose.connect(config.connectionString);
 
@@ -62,19 +63,14 @@ app.post("/create-account", async (req, res) => {
 
   await user.save();
 
-  const accessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "36000m",
-  });
-
   return res.json({
     error: false,
     user,
-    accessToken,
     message: "Registration Successful",
   });
 });
 
-app.post("/login", async (req, res) => {
+app.post("/user-login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email) {
@@ -86,6 +82,10 @@ app.post("/login", async (req, res) => {
   }
 
   const userInfo = await User.findOne({ email: email });
+
+  if(userInfo.role != "User"){
+    return res.status(401).json({message: "Unauthorized Access! Only users allowed"})
+  }
 
   if (!userInfo) {
     return res.status(400).json({ message: "User not found" });
@@ -111,7 +111,48 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/get-user",authenticateToken, async (req, res) => {
+app.post("/manager-login", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  if (!password) {
+    return res.status(400).json({ message: "password is required" });
+  }
+
+  const userInfo = await User.findOne({ email: email });
+
+  if(userInfo.role != "Manager") {
+    return res.status(401).json({message: "Unauthorized Access! Only managers allowed"})
+  }
+
+  if (!userInfo) {
+    return res.status(400).json({ message: "User not found" });
+  }
+
+  if (userInfo.email == email && userInfo.password == password) {
+    const user = { user: userInfo };
+    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: "36000m",
+    });
+
+    return res.json({
+      error: false,
+      message: "Login Successful",
+      email,
+      accessToken,
+    });
+  } else {
+    return res.status(400).json({
+      error: true,
+      message: "Invalid Credentials",
+    });
+  }
+});
+
+app.get("/get-user",authenticateToken,  async (req, res) => {
     const { user } = req.user;
 
     const isUser = await User.findOne({_id: user._id});
@@ -125,6 +166,7 @@ app.get("/get-user",authenticateToken, async (req, res) => {
             fullName: isUser.fullName,
             email: isUser.email,
             "_id": isUser._id,
+            role: isUser.role,
             createdOn: isUser.createdOn,
         },
         message: "",

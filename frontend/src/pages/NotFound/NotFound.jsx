@@ -1,8 +1,16 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import PageNotFound from "../../assets/page_notFound.jpg"
-const NotFound = () => {
-    return (
+import { useNavigate } from 'react-router-dom';
 
+const NotFound = () => {
+    const navigate = useNavigate();
+    useEffect(() => {
+        setTimeout(() => {
+            navigate('/login');
+        },2500)
+    },[]);
+
+    return (
         <div className='flex flex-col items-center justify-center mt-20'>
             <img src={PageNotFound} alt="no-notes" className='w-60' />
 

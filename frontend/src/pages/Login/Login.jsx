@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import Navbar from '../../components/Navbar/Navbar';
-import { Link, useNavigate } from 'react-router-dom';
-import PasswordInput from '../../components/input/PasswordInput';
+import { useNavigate } from 'react-router-dom';
 import { validateEmail } from '../../utils/helper';
 import axiosInstance from "../../utils/axiosInstance";
+import LoginForm from './LoginForm';
 
 
 const Login = () => {
@@ -11,10 +11,11 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [loginRole, setLoginRole] = useState("user");
 
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleUserLogin = async (e) => {
     e.preventDefault();
 
     if (!validateEmail(email)) {
@@ -30,7 +31,7 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await axiosInstance.post("/login", {
+      const response = await axiosInstance.post("/user-login", {
         email: email,
         password: password,
       });
@@ -48,39 +49,81 @@ const Login = () => {
     }
   }
 
+  const handleManagerLogin = async (e) => {
+    e.preventDefault();
+
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password) {
+      setError("please enter the passsword");
+      return;
+    }
+
+    setError("");
+
+    try {
+      const response = await axiosInstance.post("/manager-login", {
+        email: email,
+        password: password,
+      });
+
+      if (response.data && response.data.accessToken) {
+        localStorage.setItem("token", response.data.accessToken)
+        navigate('/managerdash');
+      }
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("An unexpected error occured. Please try again");
+      }
+    }
+  }
+
   return (
     <>
       <Navbar />
 
       <div className='flex items-center justify-center mt-28'>
         <div className='w-96 border rounded bg-white px-7 py-10'>
-          <form onSubmit={handleLogin}>
-            <h4 className='text-2xl mb-7'>Login</h4>
-
-            <input
-              type="text"
-              placeholder='Email'
-              className='input-box'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+          <div className=' shadow-md mb-2 rounded-md inline-block py-0.5'>
+            <button
+              onClick={() => setLoginRole("user")}
+              className={`px-4 py-1 cursor-pointer rounded-md ${loginRole == 'user' && `border`} `}
+            >User</button>
+            <button
+              onClick={() => setLoginRole("manager")}
+              className={`px-4 py-1 cursor-pointer rounded-md ${loginRole == 'manager' && `border`} `}
+            >Manager</button>
+          </div>
+          {loginRole == 'user' &&
+            <LoginForm
+              key="user"
+              placeholder="User Email"
+              handleSubmit={handleUserLogin}
+              setEmail={setEmail}
+              setPassword={setPassword}
+              password={password}
+              email={email}
+              error={error}
             />
-
-            <PasswordInput
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+          }
+          {loginRole != "user" &&
+            <LoginForm
+              key="manager"
+              placeholder="Manager Email"
+              handleSubmit={handleManagerLogin}
+              setEmail={setEmail}
+              setPassword={setPassword}
+              password={password}
+              email={email}
+              error={error}
             />
-
-            {error && <p className='text-red-500 text-xs pb-1'>{error}</p>}
-
-            <button type='submit' className='btn-primary'>Login</button>
-
-            <p className='text-sm text-center mt-4'>
-              Not registered yet?{' '}
-              <Link to="/signup" className='font-medium text-primary underline'>
-                Create an Account
-              </Link>
-            </p>
-          </form>
+          }
         </div>
       </div>
     </>

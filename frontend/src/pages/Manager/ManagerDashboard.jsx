@@ -1,67 +1,61 @@
 import React, { useEffect, useState } from 'react'
-import Navbar from '../../components/Navbar/Navbar'
-import NoteCard from '../../components/Cards/NoteCard'
-import { MdAdd } from 'react-icons/md'
-import AddEditNotes from './AddEditNotes'
-import { useNavigate } from 'react-router-dom'
+import Navbar from '../../components/Navbar/Navbar';
 import axiosInstance from '../../utils/axiosInstance';
-import Toast from '../../components/ToastMessage/Toast'
-import EmptyCard from '../../components/EmptyCard/EmptyCard'
+import { useNavigate } from 'react-router-dom';
+import NoteCard from '../../components/Cards/NoteCard';
+import EmptyCard from '../../components/EmptyCard/EmptyCard';
+import { MdAdd } from 'react-icons/md';
+import AddEditNotes from '../Home/AddEditNotes';
+import Toast from '../../components/ToastMessage/Toast';
 import Modal from 'react-modal';
 import AddNotesImg from '../../assets/add-note.svg'
 import NoDataFound from '../../assets/search-no-result.jpg'
 
+const ManagerDashboard = () => {
 
-const Home = () => {
-
-  const [openAddEditModal, setOpenAddEditModal] = useState({
-    isShown: false,
-    type: "add",
-    data: null,
-  });
-
-  const [showToastMsg, setShowToastMsg] = useState({
-    isShown: false,
-    message: "",
-    type: "add",
-  });
-
-  const showToastMessage = (message, type) => {
-    setShowToastMsg({
-      isShown: true,
-      message,
-      type,
+    const [openAddEditModal, setOpenAddEditModal] = useState({
+      isShown: false,
+      type: "add",
+      data: null,
     });
-  };
-
-  const handleCloseToast = () => {
-    setShowToastMsg({
+  
+    const [showToastMsg, setShowToastMsg] = useState({
       isShown: false,
       message: "",
+      type: "add",
     });
-  };
+  
+    const showToastMessage = (message, type) => {
+      setShowToastMsg({
+        isShown: true,
+        message,
+        type,
+      });
+    };
+  
+    const handleCloseToast = () => {
+      setShowToastMsg({
+        isShown: false,
+        message: "",
+      });
+    };
 
-  const [allNotes, setAllNotes] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
+   const [isSearch, setIsSearch] = useState(false);
+    const [allNotes, setAllNotes] = useState([]);
 
-  const [isSearch, setIsSearch] = useState(false);
-
-  const navigate = useNavigate();
-
-  const handleEdit = (noteDetails) => {
-    setOpenAddEditModal({ isShown: true, data: noteDetails, type: "edit" });
-  }
+    const navigate = useNavigate();
 
   const getUserInfo = async () => {
     try {
       const response = await axiosInstance.get("/get-user");
       console.log(response.data.user.role);
-      if (response.data.user.role !== "User") {
-      
+      if (response.data.user.role !== "Manager") {
+       
         navigate("/unauthorized");
         return;
       }
-
+    
       if (response.data && response.data.user) {
         setUserInfo(response.data.user);
       }
@@ -107,22 +101,6 @@ const Home = () => {
     }
   };
 
-  const onSearchNote = async (query) => {
-
-    try {
-      const response = await axiosInstance.get("/search-notes", {
-        params: { query },
-      });
-
-      if (response.data && response.data.notes) {
-        setIsSearch(true);
-        setAllNotes(response.data.notes);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const updateIsPinned = async (noteData) => {
     const noteId = noteData._id;
 
@@ -141,6 +119,26 @@ const Home = () => {
     }
   };
 
+  const handleEdit = (noteDetails) => {
+    setOpenAddEditModal({ isShown: true, data: noteDetails, type: "edit" });
+  }
+
+  const onSearchNote = async (query) => {
+
+    try {
+      const response = await axiosInstance.get("/search-notes", {
+        params: { query },
+      });
+
+      if (response.data && response.data.notes) {
+        setIsSearch(true);
+        setAllNotes(response.data.notes);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleClearSearch = () => {
     setIsSearch(false);
     getAllNotes();
@@ -153,15 +151,15 @@ const Home = () => {
     return () => { };
   }, []);
 
-
   return (
     <>
-      <Navbar
+    <Navbar
         userInfo={userInfo}
         onSearchNote={onSearchNote}
         handleClearSearch={handleClearSearch}
       />
 
+   
       <div className='container mx-auto'>
         {allNotes.length > 0 ? (
           <div className='grid grid-cols-3 gap-4 mt-8'>
@@ -227,9 +225,8 @@ const Home = () => {
         type={showToastMsg.type}
         onClose={handleCloseToast}
       />
-
     </>
   )
 }
 
-export default Home
+export default ManagerDashboard

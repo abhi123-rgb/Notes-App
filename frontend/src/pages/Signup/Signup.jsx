@@ -46,9 +46,8 @@ const Signup = () => {
         return
       }
 
-      if (response.data && response.data.accessToken) {
-        localStorage.setItem("token", response.data.accessToken)
-        navigate('/dashboard');
+      if (response) {
+        navigate('/login');
       }
 
     } catch (error) {
