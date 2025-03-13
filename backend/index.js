@@ -82,13 +82,13 @@ app.post("/user-login", async (req, res) => {
   }
 
   const userInfo = await User.findOne({ email: email });
+  
+    if (!userInfo) {
+      return res.status(400).json({ message: "User not found" });
+    }
 
   if(userInfo.role != "User"){
     return res.status(401).json({message: "Unauthorized Access! Only users allowed"})
-  }
-
-  if (!userInfo) {
-    return res.status(400).json({ message: "User not found" });
   }
 
   if (userInfo.email == email && userInfo.password == password) {
@@ -123,14 +123,15 @@ app.post("/manager-login", async (req, res) => {
   }
 
   const userInfo = await User.findOne({ email: email });
-
+  
+  if (!userInfo) {
+    return res.status(400).json({ message: "User not found" });
+  }
+  
   if(userInfo.role != "Manager") {
     return res.status(401).json({message: "Unauthorized Access! Only managers allowed"})
   }
 
-  if (!userInfo) {
-    return res.status(400).json({ message: "User not found" });
-  }
 
   if (userInfo.email == email && userInfo.password == password) {
     const user = { user: userInfo };
